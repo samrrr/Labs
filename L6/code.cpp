@@ -185,9 +185,10 @@ int sdv_p(int c, int b1, int b2, int k)
 */
 int sdv_l(int c, int b1, int b2, int k)
 {
+
 	c =
 		(c & ~(0xFFFFFFFF >> b1 << b1 << b2 >> b2)) |
-		((c & 0xFFFFFFFF) >> b1 << (32 - k) >> b2);
+		((c & 0xFFFFFFFF) >> b1 << b1 << b2 << k >> b2);
 	return c;
 }
 
@@ -304,7 +305,6 @@ void menu_output(int i,int i_res,bool is_res)
 */
 void input_sdvp(int*k, int*b1, int*b2)
 {
-	puts("¬ведите количество битов на которое будет сдвиг:");
 	do
 	{
 		puts("¬ведите номер бита от 0 до 30, с которого будет сдвиг:");
@@ -423,7 +423,6 @@ int menu_bits(int i, int i_res, bool *is_res)
 
 void main()
 {
-	put_bits(0);
 	setlocale(0, "RU");
 
 
@@ -440,6 +439,10 @@ void main()
 		SetCurrentConsoleFontEx(hCon, FALSE, &cfi);
 	}
 	SetConsoleTextAttribute(hConsole, (WORD)(15));
+
+	put_bits(0xffff0000);
+	puts("");
+	put_bits(sdv_l(0xffff0000, 31 - 20, 10, 10));
 
 	int i = 0;     //¬ведЄнное число
 	int i_res = 0; //–езультат обработки числа
