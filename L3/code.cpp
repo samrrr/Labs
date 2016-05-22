@@ -19,7 +19,8 @@ typedef struct ST1
 	struct ST1 *link1;//Ссылка на следующий элемент
 }OSHIP;
 
-char *S_input_nt_help = "Запрещено:\n  1. Вводить символы кирилицы\n  2. Вводить пробел в начале\n  3. Вводить несколько пробелов подряд\n  4. Вводить какие либо символы кроме английских букв, пробела и\n     круглых скобок\nВвод запрещённых символов будет игнорироваться.\nПробел в конце имени будет игнорироваться.\nВводимая строка должна состоять из одного или нескольких слов,\nпервое из которых должно начинаться с прописной буквы.\nВсе прописные буквы в слове после первой будут сделаны строчными.\nВводимая строка может содержать от 1 до 50 символов.\nПри достижении максимального количества символов ввод\nсимволов будет игнорироваться.\nДля окончания ввода нажмите Enter\n";
+#define S_input_path_help "Запрещено:\n  1. Вводить символы кириллицы\n  2. Вводить пробел в начале\n  3. Вводить несколько пробелов подряд\nВвод запрещённых символов игнорируется.\nПробел в конце пути будет игнорироваться.\nВы также можете добавить расширение \".txt\", для того, чтобы можно\nбыло открыть файл в блокноте.\n\nДля окончания ввода нажмите Enter\n"
+#define S_input_nt_help "Запрещено:\n  1. Вводить символы кириллицы\n  2. Вводить пробел в начале\n  3. Вводить несколько пробелов подряд\n  4. Вводить какие либо символы, кроме английских букв, пробела и\n     круглых скобок\nВвод запрещённых символов будет игнорироваться.\nПробел в конце будет игнорироваться.\nВводимая строка должна состоять из одного или нескольких слов,\nпервое из которых должно начинаться с строчной буквы.\nВсе строчные буквы в слове после первой будут сделаны прописными.\nВводимая строка может содержать от 1 до 50 символов.\nПри достижении максимального количества символов ввод\nсимволов будет игнорироваться.\nДля окончания ввода нажмите Enter\n"
 char *S_input_number = "Разрешено вводить только цифры и '-'.\nВвод других символов игнорируется.\nОбязательно надо ввести число.\n";
 
 /*
@@ -357,29 +358,6 @@ int get_coord(char* title, char ch)
 }
 
 /*
-Описание: Это функция для ввода числа в заданных пределах.
-Возврат: Эта функция возвращает введённое число.
-*/
-int get_sized(char* title, int min, int max, char* name)
-{
-	int num;//Введённое число
-	do
-	{
-		puts(title);
-		printf(S_input_number);
-		printf("Вводите %s (целое число от %i до %i):\n", name, min, max);
-		num = input_number();
-		if (num < min || num > max)
-		{
-			printf("Ошибка. Пожалуйста введите %s(от %i до %i)\n", name, min, max);
-			system("pause");
-			system("cls");
-		}
-	} while (num < min || num > max);
-	return num;
-}
-
-/*
 Описание: Функция получения полей структуры.
 Возврат: Эта функция ничего не возвращает.
 */
@@ -395,10 +373,6 @@ void get_struct_info(DATA *info)
 	info->y = get_coord("Ввод данных кораблика", 'y');
 	system("cls");
 	info->z = get_coord("Ввод данных кораблика", 'z');
-	system("cls");
-	info->m = get_sized("Ввод данных кораблика", 10, 100000, "водоизмещение");
-	system("cls");
-	info->speed = get_sized("Ввод данных кораблика", 0, 1000, "скорость в см/с");
 }
 
 /*
@@ -573,22 +547,36 @@ bool save(char *file_name, OSHIP*ship)
 }
 
 /*
+Описание: Это функция для добавления списка после определённого элемента исходного списка.
+Возврат: Эта функция ничего не возвращает.
+*/
+void O_add_after(OSHIP *sp, OSHIP *add_sp)
+{
+	if (sp != NULL)
+	{
+		OSHIP *li;//Вспомогательный указатель
+		for (li = add_sp; li->link1 != NULL; li = li->link1);
+		li->link1 = sp->link1;
+		sp->link1 = add_sp;
+	}
+}
+
+/*
 Описание: Функция для ввода данных из файла.
 Возврат: Эта функция возвращает указатель на первый элемент загруженного списка.
 */
 OSHIP *load(char *file_name)
 {
 	OSHIP* ship;//Указатель на первый элемент списка
-	OSHIP* el;  //Вспомогательный указатель
+	OSHIP* el;  //Указатель на новый элемент
 	OSHIP* last;//Указатель на последний элемент списка
 	FILE *f;    //Указатель на данные о файле
 	bool err;   //Флажок ошибки
 	bool end;   //Флажок конца файла
 	char *s;    //Указатель на первый символ считанный элемент
 
-	f = fopen(file_name, "r");
 
-	if (f == NULL)
+	if ((f = fopen(file_name, "r")) == NULL)
 		return NULL;
 
 	err = 0;
@@ -597,8 +585,7 @@ OSHIP *load(char *file_name)
 
 	do
 	{
-		s = F_gets('\n', 50, f);
-		if (s != NULL)
+		if ((s = F_gets('\n', 50, f)) != NULL)
 		{
 			if (s[0] != '\0')
 			{
@@ -607,13 +594,16 @@ OSHIP *load(char *file_name)
 				el->link1 = NULL;
 				el->info.type = NULL;
 				if (ship != NULL)
-					last = last->link1 = el;
+				{
+					O_add_after(last, el);
+					last = last->link1;
+				}
 				else
 					ship = last = el;
 
 				el->info.name = s;
-				s = F_gets('\n', 50, f);
-				if (s != NULL)
+				
+				if ((s = F_gets('\n', 50, f)) != NULL)
 				{
 					el->info.type = s;
 					err = fscanf(f, "%i %i %i", &(el->info.x), &(el->info.y), &(el->info.z)) != 3;
@@ -652,8 +642,6 @@ OSHIP *input_menu(OSHIP *ship)
 	int menu;       //Выбранный пункт меню
 	char *file_name;//Указатель на первый символ строки пути к файлу
 
-	file_name = (char*)malloc(sizeof(char) * 8);
-	strcpy(file_name, "txt.txt");
 
 	do
 	{
@@ -675,20 +663,13 @@ OSHIP *input_menu(OSHIP *ship)
 			system("pause");
 			break;
 		case 2:
-			printf("Сейчас путь к файлу: \"%s\"\n", file_name);
-			puts("Желаете сменить путь? (y/n)");
-			if (input_yn())
-			{
-				puts("Вводите путь к файлу(путь к файлу должен содержать хотя бы 1 символ но не более 70):");
-				free(file_name);
-				file_name = input_string(70,"");
-			}
+			file_name = get_path("txt.txt");
 			ship = O_free_all(ship);
-			ship = load(file_name);
-			if (ship != NULL)
+			if ((ship = load(file_name)) != NULL)
 				puts("Список успешно загружен");
 			else
 				puts("Не удалось загрузить список");
+			free(file_name);
 
 			system("pause");
 			break;
@@ -718,8 +699,6 @@ void output_menu(OSHIP *ship)
 	int menu;       //Выбранный пункт меню
 	char *file_name;//Указатель на первый символ строки пути к файлу
 
-	file_name = (char*)malloc(sizeof(char) * 8);
-	strcpy(file_name, "txt.txt");
 
 	do
 	{
@@ -739,18 +718,12 @@ void output_menu(OSHIP *ship)
 			break;
 		case 2:
 			system("cls");
-			printf("Сейчас путь к файлу: \"%s\"\n", file_name);
-			puts("Желаете сменить путь?");
-			if (input_yn())
-			{
-				puts("Вводите путь к файлу(путь к файлу должен содержать хотя бы 1 символ но не более 70):");
-				free(file_name);
-				file_name = input_string(70,"");
-			}
+			file_name = get_path("out.txt");
 			if (save(file_name, ship))
 				puts("Список успешно сохранён");
 			else
 				puts("Не удалось сохранить список");
+			free(file_name);
 			system("pause");
 			break;
 		case 0:
@@ -772,8 +745,6 @@ OSHIP* remove_menu(OSHIP* ship)
 	int menu;       //Выбранный пункт меню
 	char *file_name;//Указатель на первый символ строки пути к файлу
 	
-	file_name = (char*)malloc(sizeof(char) * 8);
-	strcpy(file_name, "txt.txt");
 
 	do
 	{
@@ -791,23 +762,17 @@ OSHIP* remove_menu(OSHIP* ship)
 			if (ship != NULL)
 				ship = O_free_all(ship);
 			else
-				puts("Список пуст");
+				puts("Список пуст. Удалять нечего");
 			system("pause");
 			break;
 		case 2:
 			system("cls");
-			printf("Сейчас путь к файлу: \"%s\"\n", file_name);
-			puts("Желаете сменить путь?");
-			if (input_yn())
-			{
-				puts("Вводите путь к файлу(путь к файлу должен содержать хотя бы 1 символ но не более 70):");
-				free(file_name);
-				file_name = input_string(70, "");
-			}
+			file_name = get_path("out.txt");
 			if (remove(file_name) == 0)
 				puts("Файл удалён");
 			else
 				puts("Не удалось удалить файл");
+			free(file_name);
 			system("pause");
 			break;
 		case 0:
@@ -880,7 +845,7 @@ void help_menu()
 			break;
 		case 4:
 			puts("Вывести пустой список невозможно");
-			puts("Символы кирилицы вводить запрещено");
+			puts("Символы кириллицы вводить запрещено");
 			puts("Имя кораблика может максимально иметь 50 символов и состоит только из:");
 			puts("  -английских букв");
 			puts("  -пробелов");
@@ -1035,6 +1000,11 @@ int main()
 
 
 
+
+//**//PF get_nt,name,"Указатель на первый элемент строки с именем того, что вводим"
+//**//PF get_path,demo_f,"Указатель на первый элемент строки с путём к демо файлу"
+//**//PF get_type,title,"Указатель на первый элемент строки с заголовком для ввода"
+//**//PF get_coord,title,"Указатель на первый элемент строки с заголовком для ввода"
 //**//PF is_allowed,not_allowed,"Указатель на первый элемент массива данных с запрещёнными символами"
 //**//PF input_string,size,"Максимальный размер вводимой строки"
 //**//PF input_string,not_allowed,"Указатель на первый символ строки с запрещёнными символами"
