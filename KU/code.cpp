@@ -322,7 +322,7 @@ char* get_nt(char *title,char* name)
 */
 char* get_path(char* demo_f)
 {
-	char* file_name;
+	char* file_name;//Указатель на первый символ строки, содержащей путь к файлу
 	system("cls");
 	if (demo_f!=NULL)
 		printf("Желаете использовать демо-файл: \"%s\"?\n", demo_f);
@@ -1790,7 +1790,7 @@ OSHIP* O_find(FINDDATA*find, OSHIP*ship)
 	if (ship_res != NULL)
 	{
 		link->link1 = NULL;
-		puts("Поиск завершон");
+		puts("Поиск завершён");
 	}
 	else
 		puts("Не найдено элементов, удовлетворяющих заданным критериям");
@@ -2263,7 +2263,7 @@ int main()
 			ship=calculate_menu(ship);
 			break;
 		case 4:
-			ship=edit_menu(ship);
+			ship = edit_menu(ship);
 			break;
 		case 5:
 			ship = remove_menu(ship);

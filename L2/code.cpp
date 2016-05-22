@@ -535,7 +535,7 @@ OSHIP* O_find(OSHIP* ship)
 	if (ship_res != NULL)
 		link->link1 = NULL;
 	if (ship_res != NULL)
-		puts("Поиск завершон");
+		puts("Поиск завершён");
 	else
 		puts("Не найдено элементов, удовлетворяющих заданным критериям");
 
@@ -1053,7 +1053,7 @@ DSHIP* D_find(DSHIP* ship)
 	if (ship_res != NULL)
 		link->link1 = NULL;
 	if (ship_res != NULL)
-		puts("Поиск завершон");
+		puts("Поиск завершён");
 	else
 		puts("Не найдено элементов, удовлетворяющих заданным критериям");
 
@@ -1778,7 +1778,7 @@ CSHIP* C_find(CSHIP* ship)
 		ship = ship->link1;
 	} while (ship != NULL);
 	if (ship_res != NULL)
-		puts("Поиск завершон");
+		puts("Поиск завершён");
 	else
 		puts("Не найдено элементов, удовлетворяющих заданным критериям");
 

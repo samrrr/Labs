@@ -31,12 +31,14 @@ char my_getch()
 	char ch;//Код нажатой кнопки.
 	do
 	{
-		ch = _getch();
-		if (ch == '\r')
+		if ((ch = _getch()) == '\r')
 			ch = '\n';
 		else
 			if (ch == '\0' || ch == -32)
-				_getch();
+			{
+				if (kbhit())
+					_getch();
+			}
 			else
 				if (ch == '\t')
 					ch = ' ';
@@ -57,8 +59,7 @@ int input_number()
 	s = (char*)malloc(sizeof(char));
 	do
 	{
-		ch = my_getch();//Получаем символ нажатой кнопки
-		switch (ch)
+		switch (ch = my_getch())//Получаем символ нажатой кнопки
 		{
 		case '\b':
 			if (length > 1)
@@ -103,8 +104,8 @@ bool input_yn()
 
 	do
 	{
-		ch = my_getch();//Получаем символ нажатой клавиши
-		switch (ch)
+
+		switch (ch = my_getch())//Получаем символ нажатой клавиши
 		{
 		case '\b':
 			if (sy != '\0')
@@ -119,8 +120,7 @@ bool input_yn()
 		case 'N':
 			if (sy != '\0')
 				printf("\b \b");
-			sy = ch;
-			printf("%c", sy);
+			printf("%c", sy = ch);
 			break;
 		}
 	} while (ch != '\n' || sy == '\0');
@@ -152,8 +152,7 @@ char *input_string(int size, char *not_allowed)
 	s = NULL;
 	do
 	{
-		ch = my_getch();
-		switch (ch)
+		switch (ch = my_getch())
 		{
 		case '\b':
 			if (length > 1)
@@ -256,7 +255,7 @@ void correct_name(char* s)
 Описание: Функция для ввода имени.
 Возврат: Указатель на первый символ введённой строки.
 */
-char* get_nt(char* title)
+char* get_nt(char *title, char* name)
 {
 	char *s;  //Указатель на первый символ имени
 	bool exit;//Флажок выхода
@@ -264,12 +263,13 @@ char* get_nt(char* title)
 	do
 	{
 		system("cls");
+		puts(title);
 		printf(S_input_nt_help);
-		printf("Вводите %s:\n", title);
-		s = input_string(50, "\x1b[]{}\\|*/-+,^%$#@!&_=:;\"'1234567890`~");
+		printf("Вводите %s:\n", name);
+		s = input_string(50, "\x1b[]{}\\|*/-+,.^%$#@!&_=:;\"'1234567890`~");
 		correct_name(s);
 		printf("Распознано как:\n%s\n", s);
-		puts("Желаете вести ещё раз?");
+		puts("Желаете вести ещё раз?('y'-да 'n'-нет)");
 		if (input_yn())
 		{
 			free(s);
@@ -285,7 +285,7 @@ char* get_nt(char* title)
 Описание: Функция для ввода типа кораблика.
 Возврат: Указатель на первый символ введённой строки.
 */
-char* get_type()
+char* get_type(char* title)
 {
 	char *types[] = { "Unknown", "Pinnace", "Rowbarge",
 		"Galleon", "Shallop", "Bark", "Galliot", "Brigantine",
@@ -306,7 +306,7 @@ char* get_type()
 	if (type <= 0 || type > 20)
 	{
 		system("cls");
-		s = get_nt("тип");//Ввод типа вручную
+		s = get_nt(title, "тип");//Ввод типа вручную
 	}
 	else
 	{
@@ -322,13 +322,36 @@ char* get_type()
 Описание: Функция для ввода координат.
 Возврат: Введённая координата.
 */
-int get_coord(char ch)
+int get_coord(char* title, char ch)
 {
+	puts(title);
 	printf(S_input_number);
 	printf("Вводите положение по оси %c в сантиметрах (целое число от -999999 до 9999999):\n", ch);
 	return input_number();
 }
 
+/*
+Описание: Это функция для ввода числа в заданных пределах.
+Возврат: Эта функция возвращает введённое число.
+*/
+int get_sized(char* title, int min, int max, char* name)
+{
+	int num;//Введённое число
+	do
+	{
+		puts(title);
+		printf(S_input_number);
+		printf("Вводите %s (целое число от %i до %i):\n", name, min, max);
+		num = input_number();
+		if (num < min || num > max)
+		{
+			printf("Ошибка. Пожалуйста введите %s(от %i до %i)\n", name, min, max);
+			system("pause");
+			system("cls");
+		}
+	} while (num < min || num > max);
+	return num;
+}
 
 /*
 Описание: Функция получения полей структуры.
@@ -337,15 +360,15 @@ int get_coord(char ch)
 void get_struct_info(DATA *info)
 {
 	system("cls");
-	info->name = get_nt("имя");
+	info->name = get_nt("Ввод данных кораблика", "имя");
 	system("cls");
-	info->type = get_type();
+	info->type = get_type("Ввод данных кораблика");
 	system("cls");
-	info->x = get_coord('x');
+	info->x = get_coord("Ввод данных кораблика", 'x');
 	system("cls");
-	info->y = get_coord('y');
+	info->y = get_coord("Ввод данных кораблика", 'y');
 	system("cls");
-	info->z = get_coord('z');
+	info->z = get_coord("Ввод данных кораблика", 'z');
 }
 
 /*

@@ -23,7 +23,7 @@ char *S_input_nt_help = "Запрещено:\n  1. Вводить символы кирилицы\n  2. Вводить
 char *S_input_number = "Разрешено вводить только цифры и '-'.\nВвод других символов игнорируется.\nОбязательно надо ввести число.\n";
 
 /*
-Описание: Функция для получения символа. 
+Описание: Функция для получения символа.
 Возврат: Введённый символ.
 */
 char my_getch()
@@ -31,12 +31,14 @@ char my_getch()
 	char ch;//Код нажатой кнопки.
 	do
 	{
-		ch = _getch();
-		if (ch == '\r')
+		if ((ch = _getch()) == '\r')
 			ch = '\n';
 		else
 			if (ch == '\0' || ch == -32)
-				_getch();
+			{
+				if (kbhit())
+					_getch();
+			}
 			else
 				if (ch == '\t')
 					ch = ' ';
@@ -57,8 +59,7 @@ int input_number()
 	s = (char*)malloc(sizeof(char));
 	do
 	{
-		ch = my_getch();//Получаем символ нажатой кнопки
-		switch (ch)
+		switch (ch = my_getch())//Получаем символ нажатой кнопки
 		{
 		case '\b':
 			if (length > 1)
@@ -96,20 +97,22 @@ bool input_yn()
 {
 	char sy;       //Введённый символ
 	char ch;       //Нажатая клавиша
-	
+
 	printf("Ваш выбор(Можно вводить только 'y' и 'n'): ");
 
 	sy = '\0';
 
 	do
 	{
-		ch = my_getch();//Получаем символ нажатой клавиши
-		switch (ch)
+
+		switch (ch = my_getch())//Получаем символ нажатой клавиши
 		{
 		case '\b':
 			if (sy != '\0')
+			{
 				printf("\b \b");
-			sy = '\0';
+				sy = '\0';
+			}
 			break;
 		case 'y':
 		case 'Y':
@@ -117,8 +120,7 @@ bool input_yn()
 		case 'N':
 			if (sy != '\0')
 				printf("\b \b");
-			sy = ch;
-			printf("%c", sy);
+			printf("%c", sy = ch);
 			break;
 		}
 	} while (ch != '\n' || sy == '\0');
@@ -142,7 +144,7 @@ bool is_allowed(char ch, char *not_allowed)
 Описание: Функция для ввода строки.
 Возврат: Указатель на первый символ введённой строки.
 */
-char *input_string(int size,char *not_allowed)
+char *input_string(int size, char *not_allowed)
 {
 	char *s;       //Указатель на первый символ исходной строки
 	int length = 1;//Длина строки
@@ -150,8 +152,7 @@ char *input_string(int size,char *not_allowed)
 	s = NULL;
 	do
 	{
-		ch = my_getch();
-		switch (ch)
+		switch (ch = my_getch())
 		{
 		case '\b':
 			if (length > 1)
@@ -166,7 +167,7 @@ char *input_string(int size,char *not_allowed)
 			{
 				while (s[length - 2] == ' ')
 				{
-					length--; 
+					length--;
 					s = (char *)realloc(s, sizeof(char)*length);
 				}
 				s[length - 1] = '\0';
@@ -189,8 +190,8 @@ char *input_string(int size,char *not_allowed)
 }
 
 /*
-Описание: Функция для вычисления длинны строки.
-Возврат: Длинна строки.
+Описание: Функция для вычисления длины строки.
+Возврат: Длина строки.
 */
 int str_len(char*s)
 {
@@ -201,7 +202,7 @@ int str_len(char*s)
 }
 
 /*
-Описание: Функция для проверки, является ли символ маленькой буквой.
+Описание: Функция для проверки, является ли символ прописной буквой.
 Возврат: 1 - является, 0 - не является.
 */
 bool is_sm_letter(char ch)
@@ -210,7 +211,7 @@ bool is_sm_letter(char ch)
 }
 
 /*
-Описание: Функция для проверки, является ли символ большой буквой.
+Описание: Функция для проверки, является ли символ строчной буквой.
 Возврат: 1 - является, 0 - не является.
 */
 bool is_bi_letter(char ch)
@@ -229,12 +230,12 @@ void correct_name(char* s)
 	if (*s == 0)
 		return;
 
-	char ra = 'A' - 'a';//Разница в кодах больших и маленьких букв
+	char ra = 'A' - 'a';//Разница в кодах прописных и строчных букв
 	bool is_p_let;      //Флажок предыдущего символа(1-предыдущий символ буква 0-предыдущий символ не буква)
 
 	if (is_sm_letter(*s))
 	{
-		*s += ra;//Делаем из маленькой буквы большую
+		*s += ra;//Делаем из прописной буквы строчную
 		is_p_let = 1;
 	}
 	else
@@ -243,7 +244,7 @@ void correct_name(char* s)
 	for (s = s + 1; *s; s++)
 		if (is_p_let)
 			if (is_bi_letter(*s))
-				*s = *s - ra;//Делаем из большой буквы маленькую
+				*s = *s - ra;//Делаем из строчной буквы прописную
 			else
 				is_p_let = is_sm_letter(*s);
 		else
@@ -254,7 +255,7 @@ void correct_name(char* s)
 Описание: Функция для ввода имени.
 Возврат: Указатель на первый символ введённой строки.
 */
-char* get_nt(char* title)
+char* get_nt(char *title, char* name)
 {
 	char *s;  //Указатель на первый символ имени
 	bool exit;//Флажок выхода
@@ -262,28 +263,55 @@ char* get_nt(char* title)
 	do
 	{
 		system("cls");
+		puts(title);
 		printf(S_input_nt_help);
-		printf("Вводите %s:\n", title);
-		s = input_string(50, "\x1b[]{}\\|*/-+,^%$#@!&_=:;\"'1234567890`~");
+		printf("Вводите %s:\n", name);
+		s = input_string(50, "\x1b[]{}\\|*/-+,.^%$#@!&_=:;\"'1234567890`~");
 		correct_name(s);
-		printf("Распознано как:\n%s\n",s);
-		puts("Желаете вести ещё раз?");
+		printf("Распознано как:\n%s\n", s);
+		puts("Желаете вести ещё раз?('y'-да 'n'-нет)");
 		if (input_yn())
 		{
 			free(s);
 			s = NULL;
 		}
 		else
-		exit = 1;
+			exit = 1;
 	} while (!exit);
 	return s;
+}
+
+/*
+Описание: Функция для ввода пути к файлу.
+Возврат: Указатель на первый символ введённой строки.
+*/
+char* get_path(char* demo_f)
+{
+	char* file_name;//Указатель на первый символ строки, содержащей путь к файлу
+	system("cls");
+	if (demo_f != NULL)
+		printf("Желаете использовать демо-файл: \"%s\"?\n", demo_f);
+	if (input_yn() && demo_f != NULL)
+	{
+		file_name = (char*)malloc(8 * sizeof(char));
+		strcpy(file_name, "txt.txt");
+	}
+	else
+	{
+		printf(S_input_path_help);
+		puts("Вводите путь к файлу(путь к файлу должен содержать хотя бы 1 символ,");
+		puts("но не более 70):");
+		file_name = input_string(70, "");
+	}
+
+	return file_name;
 }
 
 /*
 Описание: Функция для ввода типа кораблика.
 Возврат: Указатель на первый символ введённой строки.
 */
-char* get_type()
+char* get_type(char* title)
 {
 	char *types[] = { "Unknown", "Pinnace", "Rowbarge",
 		"Galleon", "Shallop", "Bark", "Galliot", "Brigantine",
@@ -304,7 +332,7 @@ char* get_type()
 	if (type <= 0 || type > 20)
 	{
 		system("cls");
-		s = get_nt("тип");//Ввод типа вручную
+		s = get_nt(title, "тип");//Ввод типа вручную
 	}
 	else
 	{
@@ -320,11 +348,35 @@ char* get_type()
 Описание: Функция для ввода координат.
 Возврат: Введённая координата.
 */
-int get_coord(char ch)
+int get_coord(char* title, char ch)
 {
+	puts(title);
 	printf(S_input_number);
 	printf("Вводите положение по оси %c в сантиметрах (целое число от -999999 до 9999999):\n", ch);
 	return input_number();
+}
+
+/*
+Описание: Это функция для ввода числа в заданных пределах.
+Возврат: Эта функция возвращает введённое число.
+*/
+int get_sized(char* title, int min, int max, char* name)
+{
+	int num;//Введённое число
+	do
+	{
+		puts(title);
+		printf(S_input_number);
+		printf("Вводите %s (целое число от %i до %i):\n", name, min, max);
+		num = input_number();
+		if (num < min || num > max)
+		{
+			printf("Ошибка. Пожалуйста введите %s(от %i до %i)\n", name, min, max);
+			system("pause");
+			system("cls");
+		}
+	} while (num < min || num > max);
+	return num;
 }
 
 /*
@@ -334,17 +386,20 @@ int get_coord(char ch)
 void get_struct_info(DATA *info)
 {
 	system("cls");
-	info->name = get_nt("имя");
+	info->name = get_nt("Ввод данных кораблика", "имя");
 	system("cls");
-	info->type = get_type();
+	info->type = get_type("Ввод данных кораблика");
 	system("cls");
-	info->x = get_coord('x');
+	info->x = get_coord("Ввод данных кораблика", 'x');
 	system("cls");
-	info->y = get_coord('y');
+	info->y = get_coord("Ввод данных кораблика", 'y');
 	system("cls");
-	info->z = get_coord('z');
+	info->z = get_coord("Ввод данных кораблика", 'z');
+	system("cls");
+	info->m = get_sized("Ввод данных кораблика", 10, 100000, "водоизмещение");
+	system("cls");
+	info->speed = get_sized("Ввод данных кораблика", 0, 1000, "скорость в см/с");
 }
-
 
 /*
 Описание: Функция для ввода списка.
