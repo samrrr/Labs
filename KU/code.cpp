@@ -640,7 +640,7 @@ int test_file(char*file_name)
 				fclose(f);
 				return -1;
 			}
-
+		free(s);
 
 		s = F_gets('\n', 20, f);
 		if (s == NULL || s[0]=='\0')
@@ -2190,11 +2190,47 @@ OSHIP* edit_menu(OSHIP *ship)
 	return ship;
 }
 
+/*
+Описание: Это функция для создания меню сохранения картотеки при выводе.
+Возврат: Эта функция возвращает указатель на первый элемент списка.
+*/
+void exit_save(OSHIP* ship)
+{
+	bool saved;     //Флажок сохранения в файл
+	char *file_name;//Указатель на первый символ строки пути к файлу
+
+	do
+	{
+		system("cls");
+		puts("Сейчас в оперативной памяти находится картотека");
+		puts("При выходе она будет удалена");
+		puts("Желаете сохранить её в файл?(y-да n-нет)");
+		if (input_yn())
+		{
+			file_name = get_path("out.txt");
+			saved = save(file_name, ship, 0);
+			free(file_name);
+			if (saved)
+			{
+				puts("Картотека успешно сохранена в файл");
+				system("pause");
+			}
+		}
+		else
+			saved = 1;
+	} while (!saved);
+}
+
+/*
+Описание: Это функция для создания главного меню.
+_________
+*/
 int main()
 {
 	setlocale(0, "RU");
 	int menu;       //Выбранный пункт меню
 	OSHIP *ship;    //Указатель на первый элемент списка
+
 	//Изменение размера шрифта
 	HANDLE hCon = CreateConsoleScreenBuffer(GENERIC_READ | GENERIC_WRITE, 0, NULL, CONSOLE_TEXTMODE_BUFFER, NULL);
 	if (hCon != INVALID_HANDLE_VALUE) {
@@ -2282,6 +2318,9 @@ int main()
 			break;
 		}
 	} while (menu);
+	if (ship != NULL)
+		exit_save(ship);
+
 	ship = O_free_all(ship);
 }
 
