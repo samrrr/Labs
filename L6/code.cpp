@@ -441,14 +441,16 @@ void main()
 	SetConsoleTextAttribute(hConsole, (WORD)(15));
 
 
-	int i = 0;     //Введённое число
-	int i_res = 0; //Результат обработки числа
+	int i;     //Введённое число
+	int i_res; //Результат обработки числа
 	bool is_input; //Флажок ввода
 	bool is_res;   //Флажок результата
 	int menu;      //Переменная выбранного пункта меню
 
 	is_input = 0;
 	is_res = 0;
+	i = 0;
+	i_res = 0;
 
 	do
 	{
@@ -586,6 +588,18 @@ void main()
 
 
 
+//**//PF put_colored_bits,i,"Исходное число"
+//**//PF sdv_p_с,c,"Исходное число"
+//**//PF sdv_p,c,"Исходное число"
+//**//PF sdv_l,c,"Исходное число"
+//**//PF menu_input,i,"Указатель на исходное число"
+//**//PF menu_input,is_res,"Указатель на флажок обработки числа"
+//**//PF menu_output,i,"Исходное число"
+//**//PF menu_output,i_res,"Флажок обработки"
+//**//PF menu_bits,i,"Указатель на исходное число"
+//**//PF menu_bits,i_res,"Указатель на результат обработки"
+//**//PF menu_bits,is_res,"Указатель на флажок обработки числа"
+//**//PF put_bits,i,"Выводимое число"
 
 //**//PF put_colored_bits,b1,"Номер бита с которого начинается красная раскраска"
 //**//PF put_colored_bits,b2,"Номер бита с которого начинается зелёная раскраска"
@@ -609,5 +623,5 @@ void main()
 /*END
 
 
-bool void char int short int
+bool void char int short int 
 */
