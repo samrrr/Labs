@@ -440,9 +440,6 @@ void main()
 	}
 	SetConsoleTextAttribute(hConsole, (WORD)(15));
 
-	put_bits(0xffff0000);
-	puts("");
-	put_bits(sdv_l(0xffff0000, 31 - 20, 10, 10));
 
 	int i = 0;     //¬ведЄнное число
 	int i_res = 0; //–езультат обработки числа
